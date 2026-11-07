@@ -379,7 +379,13 @@ public static class SaveUtil
     private static bool IsG4HGSS(ReadOnlySpan<byte> data) => data.Length == SIZE_G4RAW && IsValidGeneralFooter2(data, SAV4HGSS.GeneralSize);
     private static bool IsG4BR(ReadOnlySpan<byte> data) => data.Length == SIZE_G4BR && SAV4BR.IsValidSaveFile(data);
     private static bool IsG5BW(ReadOnlySpan<byte> data) => data.Length == SIZE_G5RAW && IsValidFooter5(data, SIZE_G5BW, 0x8C);
-    private static bool IsG5B2W2(ReadOnlySpan<byte> data) => data.Length == SIZE_G5RAW && IsValidFooter5(data, SIZE_G5B2W2, 0x94);
+    private static bool IsG5B2W2(ReadOnlySpan<byte> data) => (data.Length == SIZE_G5RAW && IsValidFooter5(data, SIZE_G5B2W2, 0x94)) || IsG5Grey(data);
+
+    /// <summary>The main save size of Pokémon Grey, a Black 2/White 2 ROM hack: 0x600 bigger, for a Pokédex of 2047 species.</summary>
+    public const int SIZE_G5GREY = SIZE_G5B2W2 + SAV5B2W2.GreyMainShift;
+
+    /// <summary>Whether the save is of Pokémon Grey, whose footer is 0x600 later than Black 2/White 2's.</summary>
+    public static bool IsG5Grey(ReadOnlySpan<byte> data) => data.Length == SIZE_G5RAW && IsValidFooter5(data, SIZE_G5GREY, 0x94);
     private static bool IsG6XY(ReadOnlySpan<byte> data) => data.Length == SIZE_G6XY && HasSaveFooterBEEF(data);
     private static bool IsG6AO(ReadOnlySpan<byte> data) => data.Length == SIZE_G6ORAS && HasSaveFooterBEEF(data);
     private static bool IsG6AODemo(ReadOnlySpan<byte> data) => data.Length == SIZE_G6ORASDEMO && HasSaveFooterBEEF(data);
@@ -645,7 +651,7 @@ public static class SaveUtil
         HGSS => new SAV4HGSS(data),
 
         BW => new SAV5BW(data),
-        B2W2 => new SAV5B2W2(data),
+        B2W2 => new SAV5B2W2(data, IsG5Grey(data.Span)),
 
         XY => new SAV6XY(data),
         AO => new SAV6AO(data),

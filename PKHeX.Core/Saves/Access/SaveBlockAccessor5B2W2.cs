@@ -87,7 +87,37 @@ public sealed class SaveBlockAccessor5B2W2(SAV5B2W2 sav)
         new(0x25F00, 0x0094, 0x25FA2, 0x25FA2), // 73 Checksum Block
     ];
 
-    public IReadOnlyList<BlockInfoNDS> BlockInfo => BlocksB2W2;
+    /// <summary>
+    /// The blocks of Pokémon Grey, a Black 2/White 2 ROM hack: its Pokédex (block 54) is 0xAC4 bytes, for 2012 species, so
+    /// the blocks after it are <see cref="SAV5B2W2.GreyMainShift"/> later, and the checksums and footer start at 0x26500.
+    /// </summary>
+    private static readonly BlockInfoNDS[] BlocksGrey = GetGreyBlocks();
+
+    private const int PokedexBlock = 54;
+    private const int GreyPokedexLength = 0xAC4; // 8 + (9 * 0xFC) + (4 * 11) + 0x1B0 + 4
+    private const int GreyChecksumTable = 0x26500;
+
+    private static BlockInfoNDS[] GetGreyBlocks()
+    {
+        var result = new BlockInfoNDS[BlocksB2W2.Length];
+        for (int i = 0; i < BlocksB2W2.Length; i++)
+        {
+            var block = BlocksB2W2[i];
+            if (i == BlocksB2W2.Length - 1)
+            {
+                // The checksum block: the blocks' checksums and the footer, whose checksum is at its 0xA2
+                result[i] = new(GreyChecksumTable, block.Length, GreyChecksumTable + 0xA2, GreyChecksumTable + 0xA2);
+                continue;
+            }
+            int offset = block.Offset + (i > PokedexBlock ? SAV5B2W2.GreyMainShift : 0);
+            int length = i == PokedexBlock ? GreyPokedexLength : block.Length;
+            // A block's checksum follows its data and save count, and its copy is in the checksum table
+            result[i] = new(offset, length, offset + length + 2, GreyChecksumTable + (2 * i));
+        }
+        return result;
+    }
+
+    public IReadOnlyList<BlockInfoNDS> BlockInfo => sav.IsGrey ? BlocksGrey : BlocksB2W2;
     public BoxLayout5 BoxLayout { get; } = new(sav, Block(sav, 0));
     public MyItem5B2W2 Items { get; } = new(sav, Block(sav, 25));
     public PlayerData5B2W2 PlayerData { get; } = new(sav, Block(sav, 27));
@@ -107,7 +137,7 @@ public sealed class SaveBlockAccessor5B2W2(SAV5B2W2 sav)
     public Daycare5 Daycare { get; } = new(sav, Block(sav, 50));
     public Misc5B2W2 Misc { get; } = new(sav, Block(sav, 52));
     public Entralink5B2W2 Entralink { get; } = new(sav, Block(sav, 53));
-    public Zukan5 Zukan { get; } = new Zukan5B2W2(Block(sav, 54));
+    public Zukan5 Zukan { get; } = sav.IsGrey ? new Zukan5Grey(Block(sav, PokedexBlock)) : new Zukan5B2W2(Block(sav, PokedexBlock));
     public Encount5B2W2 Encount { get; } = new(sav, Block(sav, 55));
     public BattleSubwayPlay5 BattleSubwayPlay { get; } = new(sav, Block(sav, 56));
     public BattleSubway5 BattleSubway { get; } = new(sav, Block(sav, 57));
@@ -127,7 +157,7 @@ public sealed class SaveBlockAccessor5B2W2(SAV5B2W2 sav)
 
     public static Memory<byte> Block(SAV5B2W2 sav, int index)
     {
-        var block = BlocksB2W2[index];
+        var block = (sav.IsGrey ? BlocksGrey : BlocksB2W2)[index];
         return sav.Buffer.Slice(block.Offset, block.Length);
     }
 }
