@@ -47,6 +47,17 @@ public sealed class Zukan5B2W2(Memory<byte> dex) : Zukan5(dex)
 }
 
 /// <summary>
+/// Pokédex of Pokémon Grey, a Black 2/White 2 ROM hack: room for the 2012 species before its egg, 0xFC bytes per flag region.
+/// </summary>
+public sealed class Zukan5Grey(Memory<byte> dex) : Zukan5(dex)
+{
+    protected override int FormLen => 11;
+    protected override int BitSeenSize => 0xFC; // (2012 species + 31) / 32 * 4: the species before the egg, 2013
+    protected override int InitialSpeciesBits => 11;
+    public override (byte Index, byte Count) GetFormIndex(ushort species) => Zukan5B2W2.GetFormIndexB2W2(species);
+}
+
+/// <summary>
 /// Pokédex structure used for Generation 5 games.
 /// </summary>
 public abstract class Zukan5(Memory<byte> raw)
@@ -71,7 +82,10 @@ public abstract class Zukan5(Memory<byte> raw)
      */
 
     public Span<byte> Data => raw.Span;
-    private const int BitSeenSize = 0x54;
+    /// <summary>Bytes of each of the 9 species flag regions: 0x54 in the games, 0xFC in Pokémon Grey (2012 species).</summary>
+    protected virtual int BitSeenSize => 0x54;
+    /// <summary>Bits of <see cref="InitialSpecies"/>: 10 in the games, 11 in Pokémon Grey.</summary>
+    protected virtual int InitialSpeciesBits => 10;
     private const int DexLangIDCount = 7;
 
     public uint Magic { get => ReadUInt32LittleEndian(Data); set => WriteUInt32LittleEndian(Data, value); }
@@ -80,16 +94,24 @@ public abstract class Zukan5(Memory<byte> raw)
     public bool IsNationalDexUnlocked { get => (Packed & 1) == 1; set => Packed = (Packed & ~1u) | (value ? 1u : 0u); } // bit 0
     public uint Flags { get => (Packed >> 1) & 0x3FF; set => Packed = (Packed & ~0x7FEu) | ((value & 0x3FF) << 1); } // bit 1-10
     public bool IsNationalDexMode { get => (Packed & 0x800u) != 0; set => Packed = (Packed & ~0x800u) | (value ? 0x800u : 0u); } // bit 11
-    public ushort InitialSpecies { get => (ushort)((Packed >> 12) & 0x3FF); set => Packed = (Packed & ~0x3FF000u) | ((uint)value << 12); } // bit 12-21
+    public ushort InitialSpecies
+    {
+        get => (ushort)((Packed >> 12) & ((1u << InitialSpeciesBits) - 1)); // bit 12-21, or 12-22 in Pokémon Grey
+        set
+        {
+            var mask = ((1u << InitialSpeciesBits) - 1) << 12;
+            Packed = (Packed & ~mask) | (((uint)value << 12) & mask);
+        }
+    }
     // remaining 10 bits are unused
 
     private const ushort MaxSpecies = Legal.MaxSpeciesID_5;
     private const ushort MaxSpeciesLanguage = Legal.MaxSpeciesID_4;
 
     private const int OFS_CAUGHT = 0x8;
-    private const int OFS_SEEN = OFS_CAUGHT + BitSeenSize; // 0x5C
-    private const int OFS_DISP = OFS_SEEN + (BitSeenSize * 4); // 0x1AC
-    private const int FormDex = OFS_DISP + (BitSeenSize * 4); // 0x2FC
+    private int OFS_SEEN => OFS_CAUGHT + BitSeenSize; // 0x5C
+    private int OFS_DISP => OFS_SEEN + (BitSeenSize * 4); // 0x1AC
+    private int FormDex => OFS_DISP + (BitSeenSize * 4); // 0x2FC
     protected abstract int FormLen { get; } // byte count
 
     private int OFS_LANG => FormDex + (FormLen * 4); // 0x2FC + (0xB * 4) = 0x328 for B2/W2, 0x2FC + (0x9 * 4) = 0x320 for BW
