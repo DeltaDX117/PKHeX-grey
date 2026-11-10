@@ -60,7 +60,7 @@ public static class SaveExtensions
 
             if (pk.Species >= strings.Species.Count)
                 errata.Add($"{MsgIndexSpeciesRange} {pk.Species}");
-            else if (sav.MaxSpeciesID < pk.Species)
+            else if (sav.MaxSpeciesID < pk.Species || sav is SAV5B2W2 { IsGrey: true } && !sav.Personal.IsSpeciesInGame(pk.Species))
                 errata.Add($"{MsgIndexSpeciesGame} {strings.Species[pk.Species]}");
 
             if (!sav.Personal[pk.Species].IsFormWithinRange(pk.Form) && !FormInfo.IsValidOutOfBoundsForm(pk.Species, pk.Form, pk.Generation))

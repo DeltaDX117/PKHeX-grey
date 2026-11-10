@@ -114,6 +114,14 @@ public sealed class LegalityAnalysis
         SlotOrigin = source;
 
         Info = new LegalInfo(pk, Parse);
+        if (GreyData.Active && pk is PK5)
+        {
+            // Pokémon Grey has its own species, encounters and learnsets, which the official games' tables can't
+            // judge: its Pokémon are left unparsed, and not flagged. The game's own legality tester judges them.
+            Valid = true;
+            EnsureMovesPopulated();
+            return;
+        }
 #if SUPPRESS
         try
 #endif

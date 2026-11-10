@@ -21,7 +21,7 @@ public sealed class PK5 : PKM, ISanityChecksum,
     public override int SIZE_PARTY => PokeCrypto.SIZE_5PARTY;
     public override int SIZE_STORED => PokeCrypto.SIZE_5STORED;
     public override EntityContext Context => EntityContext.Gen5;
-    public override PersonalInfo5B2W2 PersonalInfo => PersonalTable.B2W2.GetFormEntry(Species, Form);
+    public override PersonalInfo5B2W2 PersonalInfo => (GreyData.Active ? GreyData.Instance.Personal : PersonalTable.B2W2).GetFormEntry(Species, Form);
     protected override void EncryptStored(Span<byte> stored) => PokeCrypto.Encrypt45(stored);
     protected override void EncryptParty(Span<byte> party) => PokeCrypto.CryptArray(party, EncryptionConstant);
 
@@ -297,10 +297,11 @@ public sealed class PK5 : PKM, ISanityChecksum,
     public override int Characteristic => EntityCharacteristic.GetCharacteristicInit0(PID, IV32);
 
     // Maximums
-    public override ushort MaxMoveID => Legal.MaxMoveID_5;
-    public override ushort MaxSpeciesID => Legal.MaxSpeciesID_5;
-    public override int MaxAbilityID => Legal.MaxAbilityID_5;
-    public override int MaxItemID => Legal.MaxItemID_5_B2W2;
+    // Pokémon Grey's limits while its save file is the one being edited
+    public override ushort MaxMoveID => GreyData.Active ? GreyData.Instance.MaxMoveID : (ushort)Legal.MaxMoveID_5;
+    public override ushort MaxSpeciesID => GreyData.Active ? GreyData.Instance.MaxSpeciesID : (ushort)Legal.MaxSpeciesID_5;
+    public override int MaxAbilityID => GreyData.Active ? GreyData.Instance.MaxAbilityID : Legal.MaxAbilityID_5;
+    public override int MaxItemID => GreyData.Active ? GreyData.Instance.MaxItemID : Legal.MaxItemID_5_B2W2;
     public override int MaxBallID => Legal.MaxBallID_5;
     public override GameVersion MaxGameID => Legal.MaxGameID_5; // B2
     public override int MaxIV => 31;

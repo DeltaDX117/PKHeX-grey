@@ -86,6 +86,7 @@ public static class ParseSettings
     public static void InitFromSaveFileData(SaveFile sav)
     {
         ActiveTrainer = sav;
+        GreyData.Active = sav is SAV5B2W2 { IsGrey: true };
         AllowEraCartGB = sav switch
         {
             SAV1 { IsVirtualConsole: true } => false,

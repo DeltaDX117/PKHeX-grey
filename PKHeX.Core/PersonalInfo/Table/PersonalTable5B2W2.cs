@@ -10,12 +10,20 @@ public sealed class PersonalTable5B2W2 : IPersonalTable, IPersonalTable<Personal
 {
     private readonly PersonalInfo5B2W2[] Table;
     private const int SIZE = PersonalInfo5B2W2.SIZE;
-    private const ushort MaxSpecies = Legal.MaxSpeciesID_5;
+    private readonly ushort MaxSpecies;
+    private readonly bool[]? Present;
     public ushort MaxSpeciesID => MaxSpecies;
     public int Count => Table.Length;
 
-    public PersonalTable5B2W2(Memory<byte> data)
+    public PersonalTable5B2W2(Memory<byte> data) : this(data, Legal.MaxSpeciesID_5, null) { }
+
+    /// <param name="data">The records.</param>
+    /// <param name="maxSpecies">The last species number.</param>
+    /// <param name="present">Which species numbers have a species, or null if all up to <paramref name="maxSpecies"/> do (<see cref="GreyData"/>).</param>
+    public PersonalTable5B2W2(Memory<byte> data, ushort maxSpecies, bool[]? present)
     {
+        MaxSpecies = maxSpecies;
+        Present = present;
         Table = new PersonalInfo5B2W2[data.Length / SIZE];
         var count = data.Length / SIZE;
         for (int i = 0, ofs = 0; i < count; i++, ofs += SIZE)
@@ -36,7 +44,7 @@ public sealed class PersonalTable5B2W2 : IPersonalTable, IPersonalTable<Personal
         return 0;
     }
 
-    public bool IsSpeciesInGame(ushort species) => species <= MaxSpecies;
+    public bool IsSpeciesInGame(ushort species) => species <= MaxSpecies && (Present is null || Present[species]);
     public bool IsPresentInGame(ushort species, byte form)
     {
         if (!IsSpeciesInGame(species))

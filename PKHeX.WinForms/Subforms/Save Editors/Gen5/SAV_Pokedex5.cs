@@ -30,8 +30,8 @@ public partial class SAV_Pokedex5 : Form
         CB_Species.InitializeBinding();
         CB_Species.DataSource = new BindingSource(GameInfo.FilteredSources.Species.Skip(1).ToList(), string.Empty);
 
-        for (int i = 1; i < SAV.MaxSpeciesID + 1; i++)
-            LB_Species.Items.Add($"{i:000} - {GameInfo.Strings.Species[i]}");
+        for (ushort i = 1; i <= SAV.MaxSpeciesID; i++)
+            LB_Species.Items.Add(GetListEntry(i));
 
         CHK_NationalDexUnlocked.Checked = Dex.IsNationalDexUnlocked;
         CHK_NationalDexActive.Checked = Dex.IsNationalDexMode;
@@ -39,10 +39,28 @@ public partial class SAV_Pokedex5 : Form
         TB_PID.Text = Dex.Spinda.ToString("X8");
 
         editing = false;
-        if (Dex.InitialSpecies is not (0 or > 649))
+        if (Dex.InitialSpecies != 0 && Dex.InitialSpecies <= SAV.MaxSpeciesID && SAV.Personal.IsSpeciesInGame(Dex.InitialSpecies))
             CB_Species.SelectedValue = (int)Dex.InitialSpecies;
         else
             LB_Species.SelectedIndex = 0;
+    }
+
+    /// <summary>
+    /// The list's line of a species number. Pokémon Grey's list has every number up to its last, as the list's rows are
+    /// the species numbers: a free number has no name, and a species has its number in Grey's Pokédex after it.
+    /// </summary>
+    private string GetListEntry(ushort id)
+    {
+        var names = GameInfo.Strings.Species;
+        if (SAV is not SAV5B2W2 { IsGrey: true })
+            return $"{id:000} - {names[id]}";
+
+        var grey = GreyData.Instance;
+        if (!grey.IsSpeciesPresent(id))
+            return $"{id:0000} -";
+        var name = id < names.Count ? names[id] : "?";
+        var number = grey.GetDexNumber(id);
+        return number == 0 ? $"{id:0000} - {name}" : $"{id:0000} - {name} (Grey #{number:000})";
     }
 
     private readonly CheckBox[] CP;
@@ -180,7 +198,7 @@ public partial class SAV_Pokedex5 : Form
 
     private void SetEntry()
     {
-        if (species > 649)
+        if (species > SAV.MaxSpeciesID)
             return;
 
         Dex.SetCaught(species, CP[0].Checked);
