@@ -70,7 +70,17 @@ public sealed class PK5 : PKM, ISanityChecksum,
     public override ushort SID16 { get => ReadUInt16LittleEndian(Data[0x0E..]); set => WriteUInt16LittleEndian(Data[0x0E..], value); }
     public override uint EXP { get => ReadUInt32LittleEndian(Data[0x10..]); set => WriteUInt32LittleEndian(Data[0x10..], value); }
     public override byte OriginalTrainerFriendship { get => Data[0x14]; set => Data[0x14] = value; }
-    public override int Ability { get => Data[0x15]; set => Data[0x15] = (byte)value; }
+    // Pokémon Grey keeps the ability's high byte at 0x43, a byte the original leaves 0, for the abilities past 255
+    public override int Ability
+    {
+        get => Data[0x15] | (GreyData.Active ? Data[0x43] << 8 : 0);
+        set
+        {
+            Data[0x15] = (byte)value;
+            if (GreyData.Active)
+                Data[0x43] = (byte)(value >> 8);
+        }
+    }
     public byte MarkingValue { get => Data[0x16]; set => Data[0x16] = value; }
     public override int Language { get => Data[0x17]; set => Data[0x17] = (byte)value; }
     public override int EV_HP { get => Data[0x18]; set => Data[0x18] = (byte)value; }

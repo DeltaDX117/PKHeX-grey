@@ -309,3 +309,6 @@
 太晶甲殼
 歸零化境
 毒傀儡
+Piercing Drill
+Dragonize
+Eelevate

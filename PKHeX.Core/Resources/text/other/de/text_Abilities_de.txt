@@ -309,3 +309,6 @@ Tera-Wandel
 Tera-Panzer
 Teraforming Null
 Giftpuppenspiel
+Piercing Drill
+Dragonize
+Eelevate

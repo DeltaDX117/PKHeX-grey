@@ -309,3 +309,6 @@
 テラスシェル
 ゼロフォーミング
 どくくぐつ
+Piercing Drill
+Dragonize
+Eelevate
