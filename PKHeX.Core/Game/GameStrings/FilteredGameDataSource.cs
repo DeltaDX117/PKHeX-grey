@@ -52,6 +52,7 @@ public sealed class FilteredGameDataSource
         // Some games cannot acquire every Species that exists. Some can only acquire a subset.
         _ = sav switch
         {
+            SAV5B2W2 { IsGrey: true } grey => FilterUnavailable(result, grey.Personal), // free numbers between its species
             SAV7b gg => FilterUnavailable(result, gg.Personal),
             SAV8LA la => FilterUnavailable(result, la.Personal),
             // BD/SP can be handled by <= MaxSpeciesID as it as no gaps in species availability.

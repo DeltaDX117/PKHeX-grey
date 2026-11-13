@@ -8,6 +8,17 @@ PKHeX
 
 Pokémon core series save editor, programmed in [C#](https://en.wikipedia.org/wiki/C_Sharp_%28programming_language%29).
 
+## Pokémon Grey
+
+This fork also opens the saves of Pokémon Grey, a Black 2/White 2 ROM hack with a bigger save and more species.
+
+* A Grey save is recognized when it is loaded, and edited like a Black 2/White 2 save.
+* Grey's species, their stats and their numbers in Grey's Pokédex come from a data file that the hack's build writes
+  (`build/grey.pkhex`). A copy is built into the program; a `grey.pkhex` beside `PKHeX.exe` replaces it, so a new
+  species in the hack needs only that file copied, not a new build of PKHeX.
+* Legality isn't checked for the Pokémon of a Grey save: the official games' tables can't judge the hack's species
+  and encounters.
+
 Supports the following files:
 * Save files ("main", \*.sav, \*.dsv, \*.dat, \*.gci, \*.bin)
 * GameCube Memory Card files (\*.raw, \*.bin) containing GC Pokémon savegames.

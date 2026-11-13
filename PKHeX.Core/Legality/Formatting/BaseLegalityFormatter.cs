@@ -14,10 +14,10 @@ public sealed class BaseLegalityFormatter : ILegalityFormatter
     public string GetReport(in LegalityLocalizationContext la)
     {
         var l = la.Analysis;
+        if (!l.Parsed) // before Valid: Pokémon Grey's are unparsed and not flagged
+            return la.Settings.Lines.AnalysisUnavailable;
         if (l.Valid)
             return la.Settings.Lines.Legal;
-        if (!l.Parsed)
-            return la.Settings.Lines.AnalysisUnavailable;
 
         List<string> lines = [];
         GetLegalityReportLines(la, lines);

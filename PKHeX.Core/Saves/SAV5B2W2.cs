@@ -34,10 +34,13 @@ public sealed class SAV5B2W2 : SAV5, ISaveBlock5B2W2
     public const int GreyExtShift = 0x1000;
     private int ExtShift => IsGrey ? GreyExtShift : 0;
 
-    public override PersonalTable5B2W2 Personal => PersonalTable.B2W2;
+    public override PersonalTable5B2W2 Personal => IsGrey ? GreyData.Instance.Personal : PersonalTable.B2W2;
+    public override ushort MaxSpeciesID => IsGrey ? GreyData.Instance.MaxSpeciesID : base.MaxSpeciesID;
+    public override ushort MaxMoveID => IsGrey ? GreyData.Instance.MaxMoveID : base.MaxMoveID;
+    public override int MaxAbilityID => IsGrey ? GreyData.Instance.MaxAbilityID : base.MaxAbilityID;
     public SaveBlockAccessor5B2W2 Blocks { get; }
     protected override SAV5B2W2 CloneInternal() => new(Data.ToArray(), IsGrey);
-    public override int MaxItemID => Legal.MaxItemID_5_B2W2;
+    public override int MaxItemID => IsGrey ? GreyData.Instance.MaxItemID : Legal.MaxItemID_5_B2W2;
 
     public override PlayerBag5B2W2 Inventory => new(this);
 
