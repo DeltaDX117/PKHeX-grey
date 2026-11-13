@@ -40,9 +40,22 @@ public sealed class PersonalInfo5B2W2(Memory<byte> Raw) : PersonalInfo, IPersona
     public override byte EXPGrowth { get => Data[0x15]; set => Data[0x15] = value; }
     public override int EggGroup1 { get => Data[0x16]; set => Data[0x16] = (byte)value; }
     public override int EggGroup2 { get => Data[0x17]; set => Data[0x17] = (byte)value; }
-    public int Ability1 { get => Data[0x18]; set => Data[0x18] = (byte)value; }
-    public int Ability2 { get => Data[0x19]; set => Data[0x19] = (byte)value; }
-    public int AbilityH { get => Data[0x1A]; set => Data[0x1A] = (byte)value; }
+    public int Ability1 { get => Wide?[0] ?? Data[0x18]; set => SetAbility(0, value); }
+    public int Ability2 { get => Wide?[1] ?? Data[0x19]; set => SetAbility(1, value); }
+    public int AbilityH { get => Wide?[2] ?? Data[0x1A]; set => SetAbility(2, value); }
+
+    /// <summary>Pokémon Grey's abilities in full, past the 255 a byte of the record holds, or null.</summary>
+    private int[]? Wide;
+
+    /// <summary>Gives the record Pokémon Grey's abilities in full (<see cref="GreyData"/>'s ABIL section).</summary>
+    public void SetWideAbilities(int ability1, int ability2, int abilityH) => Wide = [ability1, ability2, abilityH];
+
+    private void SetAbility(int index, int value)
+    {
+        Data[0x18 + index] = (byte)value;
+        if (Wide is not null)
+            Wide[index] = value;
+    }
 
     public override int EscapeRate { get => Data[0x1B]; set => Data[0x1B] = (byte)value; }
     public override int FormStatsIndex { get => ReadUInt16LittleEndian(Data[0x1C..]); set => WriteUInt16LittleEndian(Data[0x1C..], (ushort)value); }

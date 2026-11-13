@@ -316,5 +316,10 @@ public enum Ability : ushort
     TeraShell,
     TeraformZero,
     PoisonPuppeteer,
+
+    // Pokémon Grey: Legends Z-A's
+    PiercingDrill,
+    Dragonize,
+    Eelevate,
     MAX_COUNT,
 }

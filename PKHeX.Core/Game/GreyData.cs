@@ -68,6 +68,18 @@ public sealed class GreyData
             DexNumbers[i] = ReadUInt16LittleEndian(numbers[(i * 2)..]);
 
         Personal = new PersonalTable5B2W2(Section(data, "PERS"), MaxSpeciesID, Present);
+
+        // Version 2 has every record's abilities in full, which Grey keeps in 16 bits
+        if (TrySection(data, "ABIL", out var wide))
+        {
+            var abilities = wide.Span;
+            for (int i = 0; i < Personal.Count && (i * 6) + 6 <= abilities.Length; i++)
+            {
+                var entry = abilities[(i * 6)..];
+                Personal[i].SetWideAbilities(ReadUInt16LittleEndian(entry), ReadUInt16LittleEndian(entry[2..]),
+                    ReadUInt16LittleEndian(entry[4..]));
+            }
+        }
     }
 
     /// <summary>Whether the species number has a species: Grey's numbers follow the official ones, with free numbers between.</summary>
@@ -78,6 +90,13 @@ public sealed class GreyData
 
     private static Memory<byte> Section(Memory<byte> data, ReadOnlySpan<char> tag)
     {
+        if (TrySection(data, tag, out var section))
+            return section;
+        throw new ArgumentException($"Pokémon Grey's data has no {tag} section.", nameof(data));
+    }
+
+    private static bool TrySection(Memory<byte> data, ReadOnlySpan<char> tag, out Memory<byte> section)
+    {
         var span = data.Span;
         int count = ReadUInt16LittleEndian(span[6..]);
         for (int i = 0; i < count; i++)
@@ -87,9 +106,11 @@ public sealed class GreyData
                 continue;
             var offset = ReadInt32LittleEndian(entry[4..]);
             var size = ReadInt32LittleEndian(entry[8..]);
-            return data.Slice(offset, size);
+            section = data.Slice(offset, size);
+            return true;
         }
-        throw new ArgumentException($"Pokémon Grey's data has no {tag} section.", nameof(data));
+        section = default;
+        return false;
     }
 
     private static GreyData Load()

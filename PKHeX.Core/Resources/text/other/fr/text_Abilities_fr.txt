@@ -309,3 +309,6 @@ Téramorphose
 Téra-Carapace
 Téraformation 0
 Emprise Toxique
+Piercing Drill
+Dragonize
+Eelevate

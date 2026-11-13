@@ -309,3 +309,6 @@ Tera Shift
 Tera Shell
 Teraform Zero
 Poison Puppeteer
+Piercing Drill
+Dragonize
+Eelevate
