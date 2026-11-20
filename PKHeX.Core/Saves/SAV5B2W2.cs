@@ -41,6 +41,8 @@ public sealed class SAV5B2W2 : SAV5, ISaveBlock5B2W2
     public SaveBlockAccessor5B2W2 Blocks { get; }
     protected override SAV5B2W2 CloneInternal() => new(Data.ToArray(), IsGrey);
     public override int MaxItemID => IsGrey ? GreyData.Instance.MaxItemID : Legal.MaxItemID_5_B2W2;
+    // Grey's own items too, in the numbers it reuses
+    public override ReadOnlySpan<ushort> HeldItems => IsGrey ? GreyData.Instance.HeldItems : Legal.HeldItems_BW;
 
     public override PlayerBag5B2W2 Inventory => new(this);
 

@@ -86,9 +86,10 @@ public sealed class GameStrings : IBasicStrings
         // Current Generation strings
         natures = Get("natures");
         types = Get("types");
-        abilitylist = Get("abilities");
+        // Pokémon Grey's abilities and moves past the official ones (GreyData)
+        abilitylist = GreyData.Extend(Get("abilities"), "abilities");
 
-        movelist = Get("moves");
+        movelist = GreyData.Extend(Get("moves"), "moves");
         // Differentiate Physical/Special Z-Moves
         for (int i = 622; i < 658; i++)
         {
@@ -98,7 +99,7 @@ public sealed class GameStrings : IBasicStrings
             movelist[i] += isPhysicalZMove ? p : s;
         }
 
-        itemlist = Get("items");
+        itemlist = GreyData.Extend(Get("items"), "items");
         characteristics = Get("character");
         specieslist = Get("species");
         wallpapernames = Get("wallpaper");

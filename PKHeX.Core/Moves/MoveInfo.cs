@@ -17,6 +17,9 @@ public static class MoveInfo
     /// <returns>Amount of PP the move has by default (no PP Ups).</returns>
     public static byte GetPP(EntityContext context, ushort move)
     {
+        // Pokémon Grey's moves and their PP (GreyData)
+        if (GreyData.Active && context == EntityContext.Gen5 && GreyData.Instance.GetPP(move) is { } pp)
+            return pp;
         var table = GetPPTable(context);
         if (move >= table.Length)
             return 0;
@@ -226,7 +229,13 @@ public static class MoveInfo
         _ => -1,
     };
 
-    public static byte GetType(ushort move, EntityContext context) => GetType(move, GetTypeTable(context));
+    public static byte GetType(ushort move, EntityContext context)
+    {
+        // Pokémon Grey's moves and their types, Fairy among them (GreyData)
+        if (GreyData.Active && context == EntityContext.Gen5 && GreyData.Instance.GetMoveType(move) is { } type)
+            return type;
+        return GetType(move, GetTypeTable(context));
+    }
 
     public static ReadOnlySpan<byte> GetTypeTable(EntityContext context) => context switch
     {

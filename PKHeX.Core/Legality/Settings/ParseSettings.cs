@@ -86,7 +86,13 @@ public static class ParseSettings
     public static void InitFromSaveFileData(SaveFile sav)
     {
         ActiveTrainer = sav;
-        GreyData.Active = sav is SAV5B2W2 { IsGrey: true };
+        var grey = sav is SAV5B2W2 { IsGrey: true };
+        if (grey != GreyData.Active)
+        {
+            GreyData.Active = grey;
+            // The lists of names take Grey's names, or give them back
+            GameInfo.Strings = GameInfo.Strings;
+        }
         AllowEraCartGB = sav switch
         {
             SAV1 { IsVirtualConsole: true } => false,
