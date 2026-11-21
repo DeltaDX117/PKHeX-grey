@@ -14,6 +14,9 @@ public sealed class FilteredGameDataSource
         Source = source;
         Species = GetFilteredSpecies(sav, source.SpeciesDataSource, HaX);
         Moves = GetFilteredMoves(sav, sav.Context, source, HaX);
+        // Pokémon Grey's moves only: the numbers it leaves free have no move there (GreyData)
+        if (sav is SAV5B2W2 { IsGrey: true })
+            Moves = Moves.Where(m => m.Value == 0 || GreyData.Instance.GetPP((ushort)m.Value) is not null).ToList();
         Relearn = sav is SAV7SM sm
             ? GetFilteredMoves(sm.Context, source, HaX, Legal.MaxMoveID_7_USUM) // allow for US/UM relearn move limits on S/M
             : Moves.ToList();
