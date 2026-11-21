@@ -23,7 +23,12 @@ public static class GameInfo
     public static GameStrings Strings
     {
         get => _strings;
-        set => Sources = new GameDataSource(_strings = value);
+        set
+        {
+            // Pokémon Grey's names while its save file is loaded (GreyData)
+            GreyData.ApplyNames(value, GreyData.Active);
+            Sources = new GameDataSource(_strings = value);
+        }
     }
 
     public static GameStrings GetStrings(string lang) => Languages.Get(lang);
