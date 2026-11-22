@@ -25,7 +25,8 @@ public sealed class LegalMoveInfo
     /// </summary>
     /// <param name="move">Move to check the sources for</param>
     /// <returns>Sources that allow the move to be learned</returns>
-    public IndicatedSourceType GetMoveSources(ushort move) => AllowedMoves[move];
+    /// <remarks>A move past the official ones (Pokémon Grey's, from 1000) has no learn data, so none.</remarks>
+    public IndicatedSourceType GetMoveSources(ushort move) => move < AllowedMoves.Length ? AllowedMoves[move] : None;
 
     /// <summary>
     /// Reloads the legality sources to permit the provided legal info.
