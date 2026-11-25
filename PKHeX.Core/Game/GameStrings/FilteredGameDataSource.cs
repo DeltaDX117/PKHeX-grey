@@ -46,6 +46,12 @@ public sealed class FilteredGameDataSource
     private static List<ComboItem> GetFilteredSpecies<TSave>(TSave sav, IReadOnlyList<ComboItem> source, bool HaX = false) where TSave : IGameValueLimit
     {
         var result = new List<ComboItem>(source);
+        // Pokémon Grey's free species numbers have no Pokémon in the game at all, so HaX doesn't offer them either
+        if (sav is SAV5B2W2 { IsGrey: true } greySave)
+        {
+            FilterUnavailable(result, greySave.Personal);
+            return result;
+        }
         if (HaX)
         {
             FilterAbove(result, sav.MaxSpeciesID);
@@ -55,7 +61,6 @@ public sealed class FilteredGameDataSource
         // Some games cannot acquire every Species that exists. Some can only acquire a subset.
         _ = sav switch
         {
-            SAV5B2W2 { IsGrey: true } grey => FilterUnavailable(result, grey.Personal), // free numbers between its species
             SAV7b gg => FilterUnavailable(result, gg.Personal),
             SAV8LA la => FilterUnavailable(result, la.Personal),
             // BD/SP can be handled by <= MaxSpeciesID as it as no gaps in species availability.
